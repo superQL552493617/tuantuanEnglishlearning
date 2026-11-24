@@ -1,0 +1,40 @@
+name: iOS 编译检查
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 XcodeGen 并生成项目
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: 编译（模拟器，不签名）
+        run: |
+          set -o pipefail
+          xcodebuild -project VideoApp.xcodeproj -scheme VideoApp \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log
+
+      - name: 把错误和警告摘要推到 ci-log 分支
+        if: always()
+        run: |
+          mkdir -p /tmp/ci
+          grep -E "error:|warning:" build.log | sort -u > /tmp/ci/errors.txt || true
+          tail -n 60 build.log > /tmp/ci/tail.txt || true
+          cd /tmp/ci
+          git init -q
+          git checkout -q -b ci-log
+          git add .
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "build log"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ci-log

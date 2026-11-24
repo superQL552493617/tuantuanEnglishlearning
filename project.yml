@@ -1,0 +1,55 @@
+name: VideoApp
+options:
+  bundleIdPrefix: site.tuantuanlearningEnglish
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  VideoApp:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: site.tuantuanlearningEnglish.app
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: Config/Info.plist
+      properties:
+        CFBundleDisplayName: 小团学英语
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # 切到后台/锁屏后继续播放声音
+        UIBackgroundModes:
+          - audio
+        # 允许电脑通过数据线/访达把视频拖进 App
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: false
+        # 做法二用：声明本 App 能打开哪些视频
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Video
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.movie
+              - public.video
+              - public.mpeg-4
+              - com.apple.quicktime-movie
+              - org.matroska.mkv
+              - public.avi
+        # MKV 系统不认识，需要自己声明一下
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: org.matroska.mkv
+            UTTypeDescription: Matroska Video
+            UTTypeConformsTo:
+              - public.movie
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - mkv
